@@ -120,9 +120,11 @@ function Table() {
         Remover Filtro
       </button>
       {selectedArmazenaOsFilters.map((filter, idx) => (
-        <div key={ idx }>
+        <div
+          data-testid="filter"
+          key={ filter.column }
+        >
           <button
-            data-testid="filter"
             type="button"
             onClick={ () => {
               const ArrayClonadoParaFazerOBotãoFilter = [...selectedArmazenaOsFilters];
@@ -132,7 +134,7 @@ function Table() {
           >
             x
           </button>
-          <span data-testid="filter">
+          <span>
             {filter.column}
             {filter.condition}
             {filter.value}
