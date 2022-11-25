@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 
 function Table() {
-  // const [selected, setselected] = useState({
-  //   column: '',
-  //   condition: '',
-  //   value: '',
-  // });
+  const [selected, setselected] = useState({
+    column: 'population',
+    condition: 'maior que',
+    value: 0,
+  });
+  const [selectedArmazenaOsFilters, setSelectedParaArmazenarOsFiltros] = useState([]);
   const [ResultAPIstarwars, setResultAPIstarwars] = useState([]);
   const [inputSearchFilter, setinputSearchFilter] = useState('');
   const fetchData = async () => {
@@ -27,6 +28,29 @@ function Table() {
     .filter((planet) => planet
       .name.toLowerCase().includes(inputSearchFilter));
 
+  const tratarOpcoes = (opcao) => !selectedArmazenaOsFilters
+    .find((filtro) => opcao === filtro.column);
+
+  const DadosTratadosParaOfilterDeColuna = (linha) => {
+    const bools = [];
+    selectedArmazenaOsFilters.forEach((filter) => {
+      switch (filter.condition) {
+      case 'maior que':
+        bools.push(Number(linha[filter.column]) > Number(filter.value));
+        break;
+      case 'menor que':
+        bools.push(Number(linha[filter.column]) < Number(filter.value));
+        break;
+      case 'igual a':
+        bools.push(linha[filter.column] === filter.value.toUpperCase());
+        break;
+      default:
+        return true;
+      }
+    });
+    return bools.every((el) => el);
+  };
+
   return (
     <>
       <input
@@ -35,6 +59,86 @@ function Table() {
         value={ inputSearchFilter }
         onChange={ (event) => setinputSearchFilter(event.target.value) }
       />
+      <select
+        data-testid="column-filter"
+        value={ selected.column }
+        onChange={ (e) => setselected({ ...selected, column: e.target.value }) }
+      >
+        {['population', 'orbital_period', 'diameter', 'rotation_period', 'surface_water']
+          .filter(tratarOpcoes)
+          .map((column) => (
+            <option value={ column } key={ column }>
+              {column}
+            </option>
+          ))}
+      </select>
+      <select
+        data-testid="comparison-filter"
+        value={ selected.condition }
+        onChange={ (e) => setselected({ ...selected, condition: e.target.value }) }
+      >
+        <option value="maior que">maior que</option>
+        <option value="menor que">menor que</option>
+        <option value="igual a">igual a</option>
+      </select>
+      <input
+        data-testid="value-filter"
+        type="number"
+        placeholder="digite seu valor"
+        name="filterValue"
+        value={ selected.value }
+        onChange={ (e) => setselected({ ...selected, value: e.target.value }) }
+
+      />
+      <button
+        type="button"
+        data-testid="button-filter"
+        className="add"
+        onClick={ () => {
+          setSelectedParaArmazenarOsFiltros([...selectedArmazenaOsFilters, selected]);
+          setselected({
+            column: 'population',
+            condition: 'maior que',
+            value: 0,
+          });
+        } }
+      >
+        Filtrar
+      </button>
+      <button
+        type="button"
+        data-testid="button-remove-filters"
+        onClick={ () => {
+          setSelectedParaArmazenarOsFiltros([]);
+          setselected({
+            column: 'population',
+            condition: 'maior que',
+            value: 0,
+          });
+        } }
+      >
+        Remover Filtro
+      </button>
+      {selectedArmazenaOsFilters.map((filter, idx) => (
+        <div key={ idx }>
+          <button
+            data-testid="filter"
+            type="button"
+            onClick={ () => {
+              const ArrayClonadoParaFazerOBotãoFilter = [...selectedArmazenaOsFilters];
+              ArrayClonadoParaFazerOBotãoFilter.splice(idx, 1);
+              setSelectedParaArmazenarOsFiltros(ArrayClonadoParaFazerOBotãoFilter);
+            } }
+          >
+            x
+          </button>
+          <span data-testid="filter">
+            {filter.column}
+            {filter.condition}
+            {filter.value}
+          </span>
+        </div>
+      ))}
       <table>
         <thead>
           <tr>
@@ -56,6 +160,7 @@ function Table() {
         <tbody>
           {
             ResultAPIFiltered
+              .filter(DadosTratadosParaOfilterDeColuna)
               .map((value) => (
                 <tr key={ value.name }>
                   <td>{value.name}</td>
