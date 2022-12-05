@@ -6,18 +6,21 @@ function Table() {
     condition: 'maior que',
     value: 0,
   });
+  const [order, setOrder] = useState({
+    column: 'population',
+    sort: 'ASC',
+  });
+
   const [selectedArmazenaOsFilters, setSelectedParaArmazenarOsFiltros] = useState([]);
   const [ResultAPIstarwars, setResultAPIstarwars] = useState([]);
   const [inputSearchFilter, setinputSearchFilter] = useState('');
+  // eu apaguei o try cath daqui
   const fetchData = async () => {
-    try {
-      const response = await fetch('https://swapi.dev/api/planets');
-      const { results } = await response.json();
-      delete results.residents;
-      return setResultAPIstarwars(results);
-    } catch (e) {
-      throw new Error(e.message);
-    }
+    const response = await fetch('https://swapi.dev/api/planets');
+    // const response = await fetch('https://swapi.py4e.com/api/planets');
+    const { results } = await response.json();
+    delete results.residents;
+    return setResultAPIstarwars(results);
   };
 
   useEffect(() => {
@@ -49,6 +52,20 @@ function Table() {
       }
     });
     return bools.every((el) => el);
+  };
+  // // const number = '-1';
+
+  const handleOrderClick = () => {
+  //   // const newList = [...inputSearchFilter];
+  //   // newList.sort((a, b) => {
+  //   //   if (a.column > b.column) {
+  //   //     return 1;
+  //   //   }
+  //   //   if (b.column > a.column) {
+  //   //     return number;
+  //   //   }
+  //   // });
+  //   // setOrder(newList);
   };
 
   return (
@@ -118,6 +135,40 @@ function Table() {
         } }
       >
         Remover Filtro
+      </button>
+      <br />
+      <select
+        data-testid="column-sort"
+        value={ order.column }
+        onChange={ (e) => setOrder({ ...order, column: e.target.value }) }
+      >
+        {['population', 'orbital_period', 'diameter', 'rotation_period', 'surface_water']
+          .map((NameOfColumn) => (
+            <option value={ NameOfColumn } key={ NameOfColumn }>
+              {NameOfColumn}
+            </option>
+          ))}
+      </select>
+      <input
+        type="radio"
+        data-testid="column-sort-input-asc"
+        value="ASC"
+        name="sort"
+      />
+      ascendente
+      <input
+        type="radio"
+        data-testid="column-sort-input-desc"
+        value="DESC"
+        name="sort"
+      />
+      descendente
+      <button
+        type="button"
+        data-testid="column-sort-button"
+        onClick={ handleOrderClick }
+      >
+        Ordenar
       </button>
       {selectedArmazenaOsFilters.map((filter, idx) => (
         <div
